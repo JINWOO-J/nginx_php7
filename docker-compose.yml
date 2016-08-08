@@ -1,5 +1,5 @@
 nginx_php:
-  image: jinwoo/nginx_php:5.6.24
+  image: jinwoo/nginx_php7:7.0.9
   command: bash -c "while [ 0 ]; do sleep 1;done"
   volumes:
     - ./www:/var/www/
