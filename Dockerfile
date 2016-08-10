@@ -13,7 +13,7 @@ ENV DOCKERIZE_VERSION v0.2.0
 ARG PHP_VERSION
 ENV PHP_VERSION $PHP_VERSION
 RUN echo "PHP version = ${PHP_VERSION}"
-ENV PHP_LIB redis-3.0.0 yaml-2.0.0RC8 amqp-1.7.1 memcached-2.2.0 apcu-5.1.5
+ENV PHP_LIB redis-3.0.0 yaml-2.0.0RC8 amqp-1.7.1 memcached-2.2.0 apcu-5.1.5 v8js-1.3.1
 ENV PHALCON_VER 3.0.0
 
 ENV NGINX_EXTRA_CONFIGURE_ARGS --sbin-path=/usr/sbin \
@@ -36,7 +36,9 @@ ENV NGINX_BUILD_DEPS bzip2 \
         libpcre3 \
         libpcre3-dev \
         curl \
-        libc6
+        libc6 
+
+        
 ENV NGINX_EXTRA_BUILD_DEPS gcc libc-dev make pkg-config  \
                            libxml2 \
                            ca-certificates \
@@ -94,7 +96,10 @@ ENV PHP_BUILD_DEPS bzip2 \
 		librabbitmq-dev \
 		libsasl2-dev \
 		libicu-dev \
-		g++
+		g++ \
+		python-software-properties \
+		software-properties-common
+
 		
 
 RUN sed -i 's/archive.ubuntu.com/ftp.daum.net/g' /etc/apt/sources.list
@@ -188,13 +193,16 @@ RUN mkdir -p /usr/src/pecl && cd /usr/src/pecl  \
 	&& cd libmemcached-1.0.18 \
 	&& ./configure --enable-sasl \
 	&& make -j"$(nproc)" \
-	&& sudo make install \
+	&& make install \
     && wget http://nz.archive.ubuntu.com/ubuntu/pool/universe/libr/librabbitmq/librabbitmq4_0.7.1-1_amd64.deb \
-	&& sudo dpkg -i librabbitmq4_0.7.1-1_amd64.deb \
+	&& dpkg -i librabbitmq4_0.7.1-1_amd64.deb \
 	&& wget http://nz.archive.ubuntu.com/ubuntu/pool/universe/libr/librabbitmq/librabbitmq-dev_0.7.1-1_amd64.deb \
-	&& sudo dpkg -i librabbitmq-dev_0.7.1-1_amd64.deb \
+	&& dpkg -i librabbitmq-dev_0.7.1-1_amd64.deb \
 	&& rm -rf *.deb libmemcached-1.0.18* \
-	&& rm -rf /usr/src/pecl/*
+	&& rm -rf /usr/src/pecl/* \
+	&& apt-add-repository ppa:pinepain/libv8-5.2 -y \
+	&& apt-get update \
+	&& apt-get install libv8-5.2-dev -y --allow-unauthenticated
 
 # Install composer
 RUN bash -c "wget http://getcomposer.org/composer.phar && chmod +x composer.phar && mv composer.phar /usr/local/bin/composer"
